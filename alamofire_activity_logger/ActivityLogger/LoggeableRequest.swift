@@ -45,7 +45,7 @@ public extension LoggeableRequest {
     /**
      Log the request and response with the given level and options
      */
-    public func log(level: LogLevel = .all, options: [LogOption] = LogOption.defaultOptions, printer: Printer = NativePrinter()) -> Self {
+    func log(level: LogLevel = .all, options: [LogOption] = LogOption.defaultOptions, printer: Printer = NativePrinter()) -> Self {
         
         guard level != .none else {
             return self
@@ -75,11 +75,11 @@ extension DataRequest: LoggeableRequest {
             if case .failure(let e) = response.result {
                 error = e
             }
-            
+
             let logResponse = ResponseInfo(httpResponse: response.response,
                                            data: response.data,
                                            error: error,
-                                           elapsedTime:  response.timeline.requestDuration)
+                                           elapsedTime:  response.metrics?.taskInterval.duration ?? 0)
             completion(logResponse)
         }
         
@@ -100,11 +100,10 @@ extension DownloadRequest: LoggeableRequest {
             case let .failure(value):
                 error = value
             }
-            
             let logResponse = ResponseInfo(httpResponse: response.response,
                                            data: data,
                                            error: error,
-                                           elapsedTime:  response.timeline.requestDuration)
+                                           elapsedTime:  response.metrics?.taskInterval.duration ?? 0)
             completion(logResponse)
         }
     }
